@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoute");
+const { requireAuth } = require("./middleware/authMiddleware");
 
 require("dotenv").config({ path: "./.env.development" });
 
@@ -17,6 +18,7 @@ app.use(cookieParser());
 
 // routes
 app.use(authRoutes);
+app.get("/main", requireAuth, (req, res) => res.send("Main here"));
 
 // cookies
 // app.get("/set-cookies", (req, res) => {
