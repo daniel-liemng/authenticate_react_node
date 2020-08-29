@@ -1,7 +1,14 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 const Login = () => {
+  const history = useHistory();
+
   const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({
     email: "",
     password: "",
   });
@@ -12,11 +19,34 @@ const Login = () => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  };
 
-  console.log(user);
+    // reset errors
+    setErrors({ email: "", password: "" });
+
+    try {
+      const res = await fetch("/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      console.log(data);
+      if (data.errors) {
+        setErrors({
+          ...errors,
+          email: data.errors.email,
+          password: data.errors.password,
+        });
+      }
+      if (data.user) {
+        // history.push("/");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <div className='container'>
@@ -25,7 +55,7 @@ const Login = () => {
         <div className='form-group'>
           <label htmlFor='exampleInputEmail1'>Email address</label>
           <input
-            type='email'
+            type='text'
             className='form-control'
             id='exampleInputEmail1'
             aria-describedby='emailHelp'
@@ -34,9 +64,7 @@ const Login = () => {
             value={email}
             onChange={handleChange}
           />
-          <small id='emailHelp' className='form-text text-muted'>
-            We'll never share your email with anyone else.
-          </small>
+          <small className='form-text text-danger'>{errors.email}</small>
         </div>
         <div className='form-group'>
           <label htmlFor='exampleInputPassword1'>Password</label>
@@ -49,6 +77,7 @@ const Login = () => {
             value={password}
             onChange={handleChange}
           />
+          <small className='form-text text-danger'>{errors.password}</small>
         </div>
 
         <button type='submit' className='btn btn-primary'>

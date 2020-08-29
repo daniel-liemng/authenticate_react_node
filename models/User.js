@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
 //   next();
 // });
 
-// hash pass before doc saved to db
+// hash pass before doc saved to db --> for SIGNUP
 userSchema.pre("save", async function (next) {
   // hash pass
   const salt = await bcrypt.genSalt();
@@ -37,6 +37,20 @@ userSchema.pre("save", async function (next) {
 
   next();
 });
+
+// static method to login user --> for LOGIN
+userSchema.statics.login = async function (email, password) {
+  const user = await this.findOne({ email });
+
+  if (user) {
+    const auth = await bcrypt.compare(password, user.password);
+    if (auth) {
+      return user;
+    }
+    throw Error("incorrect password");
+  }
+  throw Error("incorrect email");
+};
 
 const User = mongoose.model("user", userSchema);
 
